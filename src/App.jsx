@@ -1,18 +1,25 @@
-import { createSignal } from 'solid-js';
+import { createSignal, createResource } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import './index.css';
 import NoteBubble from './components/NoteBubble.jsx';
-import TagsView from './components/TagsView.jsx';
+
+async function fetchServer(id) {
+	const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
+	const data = await response.json();
+	return data;
+}
 
 const App = () => {
-  const [tags, setTags] = createStore([]);
-
   const [notes, setNotes] = createStore([
     {
       body: 'my first note',
-      tags: ['note', 'dummy'],
+      tags: ['note', 'dummy 2'],
     },
   ]);
+
+  const [getResourceId, setResourceId] = createSignal(1);
+
+  const [data] = createResource(getResourceId, fetchServer);
 
   const [getEditingIndex, setEditingIndex] = createSignal(false);
 
@@ -59,6 +66,10 @@ const App = () => {
 
   return (
     <div class="h-screen w-screen flex justify-center">
+		{data.loading.toString()}
+		<pre>
+			{JSON.stringify(data(), null, 2)}
+		</pre>
       <div class="w-96 h-full flex flex-col">
         <ul class="flex flex-col-reverse h-full">
           <For each={notes}>
